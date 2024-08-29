@@ -1,0 +1,107 @@
+import React, { useState, useEffect } from 'react';
+
+const CountdownClock = () => {
+  const [minutesLeftInYear, setMinutesLeftInYear] = useState(0);
+  const [minutesLeftInDay, setMinutesLeftInDay] = useState(0);
+  const [goalMinutes, setGoalMinutes] = useState(0);
+  const [goalName, setGoalName] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [finishDate, setFinishDate] = useState('');
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+      setMinutesLeftInYear(Math.floor((endOfYear - now) / (1000 * 60)));
+      setMinutesLeftInDay(Math.floor((endOfDay - now) / (1000 * 60)));
+
+      if (startDate && finishDate) {
+        const start = new Date(startDate);
+        const finish = new Date(finishDate);
+        const minutesUntilFinish = Math.floor((finish - now) / (1000 * 60));
+        setGoalMinutes(Math.max(0, minutesUntilFinish));
+      }
+    };
+
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 60000); // Update every minute
+
+    return () => clearInterval(intervalId);
+  }, [startDate, finishDate]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Form submission logic here if needed
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-green-100 p-4">
+      <div className="text-center mb-8">
+        <div className="text-4xl font-bold mb-4">
+          <span className="bg-black text-red-500 p-2 rounded mr-2">{minutesLeftInYear}</span>
+          <span className="text-sm">minutes left in year</span>
+        </div>
+        <div className="text-4xl font-bold">
+          <span className="bg-black text-red-500 p-2 rounded mr-2">{minutesLeftInDay}</span>
+          <span className="text-sm">minutes left today</span>
+        </div>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white p-6 rounded-lg shadow-md">
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="goalName">
+            Goal/Task Name
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="goalName"
+            type="text"
+            value={goalName}
+            onChange={(e) => setGoalName(e.target.value)}
+            placeholder="Enter your goal"
+          />
+        </div>
+        <div className="mb-4 flex justify-between">
+          <div className="w-1/2 pr-2">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="startDate">
+              Start Date
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="w-1/2 pl-2">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="finishDate">
+              Finish Date
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="finishDate"
+              type="date"
+              value={finishDate}
+              onChange={(e) => setFinishDate(e.target.value)}
+            />
+          </div>
+        </div>
+      </form>
+      
+      {goalName && goalMinutes > 0 && (
+        <div className="mt-8 text-center">
+          <h2 className="text-2xl font-bold mb-2">{goalName}</h2>
+          <div className="text-4xl font-bold">
+            <span className="bg-black text-red-500 p-2 rounded mr-2">{goalMinutes}</span>
+            <span className="text-sm">minutes left to achieve your goal</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CountdownClock;
